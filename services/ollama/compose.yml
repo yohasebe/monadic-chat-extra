@@ -1,0 +1,18 @@
+services:
+  ollama_service:
+    image: yohasebe/ollama
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PROJECT_TAG: "monadic-chat"
+    container_name: monadic-chat-ollama-container
+    ports:
+      - "11434:11434"
+    depends_on:
+      - ruby_service
+    networks:
+      - monadic-chat-network
+    volumes:
+        - ./ollama:/root/.ollama
+    entrypoint: ["/usr/bin/bash", "-c", "/entrypoint.sh"]

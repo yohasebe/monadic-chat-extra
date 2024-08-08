@@ -1,0 +1,259 @@
+class TalkToOllama < MonadicApp
+  include UtilitiesHelper
+
+  ollama_endpoint = nil
+  endpoints = [
+    "http://host.docker.internal:11434/api",
+    "http://localhost:11434/api"
+  ]
+  endpoints.each do |endpoint|
+    url = endpoint.gsub("/api", "")
+    begin
+      if HTTP.get(url).status.success?
+        ollama_endpoint = endpoint
+        break
+      end
+    rescue HTTP::Error
+      next
+    end
+  end
+  API_ENDPOINT = ollama_endpoint || endpoints.last
+
+  OPEN_TIMEOUT = 5
+  READ_TIMEOUT = 60
+  WRITE_TIMEOUT = 60
+  MAX_RETRIES = 5
+  RETRY_DELAY = 1
+  MAX_FUNC_CALLS = 5
+
+  def icon
+    "<i class='fa-solid fa-horse'></i>"
+  end
+
+  def description
+    "This app accesses the Ollama API to answer questions about a wide range of topics."
+  end
+
+  def initial_prompt
+    text = <<~TEXT
+      You are a friendly and professional consultant with real-time, up-to-date information about almost anything. You are able to answer various types of questions, write computer program code, make decent suggestions, and give helpful advice in response to a prompt from the user. If the prompt is unclear enough, ask the user to rephrase it. Use the same language as the user and insert an emoji that you deem appropriate for the user's input at the beginning of your response.
+    TEXT
+    text.strip
+  end
+
+  def settings
+    {
+      "disabled": API_ENDPOINT.nil?,
+      "app_name": "▷ Ollama (Chat)",
+      "context_size": 100,
+      "initial_prompt": initial_prompt,
+      "description": description,
+      "icon": icon,
+      "easy_submit": false,
+      "auto_speech": false,
+      "initiate_from_assistant": false,
+      "toggle": true,
+      "image": true,
+      "models": [
+        "llama3.1"
+      ]
+    }
+  end
+
+  def process_json_data(app, session, body, _call_depth, &block)
+    obj = session[:parameters]
+
+    texts = []
+    finish_reason = nil
+
+    body.each do |chunk|
+      begin
+        json = JSON.parse(chunk)
+        finish_reason = json["done"] ? "stop" : nil
+        if json.dig("message", "content")
+          fragment = json.dig("message", "content").to_s
+          res = {
+            "type" => "fragment",
+            "content" => fragment
+          }
+          block&.call res
+          texts << fragment
+        end
+      rescue JSON::ParserError => e
+        pp e.message
+        pp e.backtrace
+        pp e.inspect
+      end
+    rescue StandardError => e
+      pp e.message
+      pp e.backtrace
+      pp e.inspect
+    end
+
+    result = texts.join("")
+
+    if result && obj["monadic"]
+      modified = APPS[app].monadic_map(result)
+      result = modified
+    end
+
+    if result
+      res = { "type" => "message", "content" => "DONE", "finish_reason" => finish_reason }
+      block&.call res
+      result = {
+        "choices" => [{
+          "message" => {
+            "content" => result
+          },
+          "finish_reason" => finish_reason
+        }]
+      }
+      [result]
+    else
+      res = { "type" => "message", "content" => "DONE" }
+      block&.call res
+      [res]
+    end
+  end
+
+  def api_request(role, session, call_depth: 0, &block)
+    num_retrial = 0
+
+    session[:messages].delete_if do |msg|
+      msg["role"] == "assistant" && msg["content"].to_s == ""
+    end
+
+    obj = session[:parameters]
+    app = obj["app_name"]
+
+    initial_prompt = obj["initial_prompt"].gsub("{{DATE}}", Time.now.strftime("%Y-%m-%d"))
+    temperature = obj["temperature"].to_f
+    top_p = obj["top_p"].to_f
+    top_p = 0.01 if top_p == 0.0
+    context_size = obj["context_size"].to_i
+    request_id = SecureRandom.hex(4)
+
+    message = obj["message"].to_s
+
+    if obj["monadic"].to_s == "true" && message != ""
+      message = APPS[app].monadic_unit(message)
+
+      html = markdown_to_html(obj["message"]) if message != ""
+    elsif message != ""
+      html = markdown_to_html(message)
+    end
+
+    if message != "" && role == "user"
+      res = { "type" => "user",
+              "content" => {
+                "mid" => request_id,
+                "text" => obj["message"],
+                "html" => html,
+                "lang" => detect_language(obj["message"])
+              } }
+      res["images"] = obj["images"] if obj["images"]
+      block&.call res
+    end
+
+    if message != "" && role == "user"
+      res = { "mid" => request_id,
+              "role" => role,
+              "text" => message,
+              "html" => markdown_to_html(message),
+              "lang" => detect_language(message),
+              "active" => true }
+      if obj["image"]
+        res["images"] = obj["images"]
+      end
+      session[:messages] << res
+    end
+
+    if initial_prompt != ""
+      initial = { "role" => "system",
+                  "text" => initial_prompt,
+                  "html" => initial_prompt,
+                  "lang" => detect_language(initial_prompt) }
+    end
+
+    session[:messages].each { |msg| msg["active"] = false }
+    latest_messages = session[:messages].last(context_size).each { |msg| msg["active"] = true }
+    context = [initial] + latest_messages
+
+    headers = {
+      "Content-Type" => "application/json"
+    }
+
+    body = {
+      "model" => obj["model"],
+      "stream" => true,
+      "options" => {
+        "temperature" => temperature,
+        "top_p" => top_p
+      }
+    }
+
+    if obj["monadic"] || obj["json"]
+      body["response_format"] = { "type" => "json_object" }
+    end
+
+    messages_containing_img = false
+    body["messages"] = context.compact.map do |msg|
+      message = { "role" => msg["role"], "content" => msg["text"] }
+      if msg["images"] && role == "user"
+        message["images"] = msg["images"]&.map do |img|
+          img["data"].split(",")[1]
+        end
+        messages_containing_img = true
+      end
+      message
+    end
+
+    if role == "user"
+      body["messages"].last["content"] += "\n\n" + settings[:prompt_suffix] if settings[:prompt_suffix]
+    end
+
+    target_uri = "#{API_ENDPOINT}/chat"
+    headers["Accept"] = "text/event-stream"
+    http = HTTP.headers(headers)
+
+    success = false
+    MAX_RETRIES.times do
+      res = http.timeout(connect: OPEN_TIMEOUT,
+                         write: WRITE_TIMEOUT,
+                         read: READ_TIMEOUT).post(target_uri, json: body)
+      if res.status.success?
+        success = true
+        break
+      end
+      sleep RETRY_DELAY
+    end
+
+    unless res.status.success?
+      error_report = JSON.parse(res.body)
+      pp error_report
+      res = { "type" => "error", "content" => "API ERROR: #{error_report}" }
+      block&.call res
+      return [res]
+    end
+
+    process_json_data(app, session, res.body, call_depth, &block)
+  rescue HTTP::Error, HTTP::TimeoutError
+    if num_retrial < MAX_RETRIES
+      num_retrial += 1
+      sleep RETRY_DELAY
+      retry
+    else
+      pp error_message = "The request has timed out."
+      res = { "type" => "error", "content" => "HTTP ERROR: #{error_message}" }
+      block&.call res
+      [res]
+    end
+  rescue StandardError => e
+    pp e.message
+    pp e.backtrace
+    pp e.inspect
+    res = { "type" => "error", "content" => "UNKNOWN ERROR: #{e.message}\n#{e.backtrace}\n#{e.inspect}" }
+    block&.call res
+    [res]
+  end
+end

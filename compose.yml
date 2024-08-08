@@ -1,0 +1,13 @@
+include:
+  - /Applications/Monadic Chat.app/Contents/Resources/app/docker/services/ruby/compose.yml
+  - /Applications/Monadic Chat.app/Contents/Resources/app/docker/services/pgvector/compose.yml
+  - /Applications/Monadic Chat.app/Contents/Resources/app/docker/services/python/compose.yml
+  - /Applications/Monadic Chat.app/Contents/Resources/app/docker/services/selenium/compose.yml
+  - /Users/yohasebe/monadic/data/services/ollama/compose.yml
+
+networks:
+  monadic-chat-network:
+    driver: bridge
+
+volumes:
+  data:
