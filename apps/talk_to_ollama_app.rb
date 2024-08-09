@@ -63,12 +63,15 @@ class TalkToOllama < MonadicApp
   def process_json_data(app, session, body, _call_depth, &block)
     obj = session[:parameters]
 
+    buffer = ""
     texts = []
     finish_reason = nil
 
     body.each do |chunk|
       begin
-        json = JSON.parse(chunk)
+        buffer += chunk
+        json = JSON.parse(buffer)
+        buffer = ""
         finish_reason = json["done"] ? "stop" : nil
         if json.dig("message", "content")
           fragment = json.dig("message", "content").to_s
@@ -79,10 +82,8 @@ class TalkToOllama < MonadicApp
           block&.call res
           texts << fragment
         end
-      rescue JSON::ParserError => e
-        pp e.message
-        pp e.backtrace
-        pp e.inspect
+      rescue JSON::ParserError
+        buffer += chunk
       end
     rescue StandardError => e
       pp e.message
