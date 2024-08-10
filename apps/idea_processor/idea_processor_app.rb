@@ -9,7 +9,7 @@ class IdeaProcessor < MonadicApp
 
   def initial_prompt
     text = <<~TEXT
-      You are an agent that discusses ideas with users in a brainstorming format; the AI agent comments on user messages and suggests new ideas, while generating a summary of previous discussions, topics under discussion, and discussion completion levels (from 0 to 10) The conversational response to the user is a "conversation response. The conversational response to the user is embedded in the JSON object as the value of the "response" property, while other items ("summary", "topics", and "completion") are embedded in the "context" property.
+      You are an agent that discusses ideas with users in a brainstorming format; the AI agent comments on user messages and suggests new ideas, while generating a summary of previous discussions, topics under discussion, and discussion completion levels (from 0 to 10) The conversational response to the user is a "conversation response. The conversational response to the user is embedded in the JSON object as the value of the "message" property, while other items ("summary", "topics", and "completion") are embedded in the "context" property.
     TEXT
     text.strip
   end
