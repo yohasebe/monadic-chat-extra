@@ -68,3 +68,8 @@ services/ollama/ollama/*
 .solargraph.yml
 
 rsync.sh
+compose.yaml
+monadic
+monadic.gz
+*.md
+*.html
