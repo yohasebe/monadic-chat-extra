@@ -1,4 +1,3 @@
-# We can't use the name Math because it is a reserved word in Ruby
 class MonadicMathTutor < MonadicApp
   def icon
     "<i class='fa-solid fa-square-root-variable'></i>"
