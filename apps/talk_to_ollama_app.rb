@@ -26,39 +26,32 @@ class TalkToOllama < MonadicApp
   RETRY_DELAY = 1
   MAX_FUNC_CALLS = 5
 
-  def icon
-    "<i class='fa-solid fa-horse'></i>"
-  end
+  icon = "<i class='fa-solid fa-horse'></i>"
 
-  def description
-    "This app accesses the Ollama API to answer questions about a wide range of topics."
-  end
+  description = <<~TEXT
+    This app accesses the Ollama API to answer questions about a wide range of topics.
+  TEXT
 
-  def initial_prompt
-    text = <<~TEXT
-      You are a friendly and professional consultant with real-time, up-to-date information about almost anything. You are able to answer various types of questions, write computer program code, make decent suggestions, and give helpful advice in response to a prompt from the user. If the prompt is unclear enough, ask the user to rephrase it. Use the same language as the user and insert an emoji that you deem appropriate for the user's input at the beginning of your response.
-    TEXT
-    text.strip
-  end
+  initial_prompt = <<~TEXT
+    You are a friendly and professional consultant with real-time, up-to-date information about almost anything. You are able to answer various types of questions, write computer program code, make decent suggestions, and give helpful advice in response to a prompt from the user. If the prompt is unclear enough, ask the user to rephrase it. Use the same language as the user and insert an emoji that you deem appropriate for the user's input at the beginning of your response.
+  TEXT
 
-  def settings
-    {
-      "disabled": API_ENDPOINT.nil?,
-      "app_name": "▷ Ollama (Chat)",
-      "context_size": 100,
-      "initial_prompt": initial_prompt,
-      "description": description,
-      "icon": icon,
-      "easy_submit": false,
-      "auto_speech": false,
-      "initiate_from_assistant": false,
-      "toggle": true,
-      "image": true,
-      "models": [
-        "llama3.1"
-      ]
-    }
-  end
+  @settings = {
+    "disabled": API_ENDPOINT.nil?,
+    "app_name": "▷ Ollama (Chat)",
+    "context_size": 100,
+    "initial_prompt": initial_prompt,
+    "description": description,
+    "icon": icon,
+    "easy_submit": false,
+    "auto_speech": false,
+    "initiate_from_assistant": false,
+    "toggle": true,
+    "image": true,
+    "models": [
+      "llama3.1"
+    ]
+  }
 
   def process_json_data(app, session, body, _call_depth, &block)
     obj = session[:parameters]
