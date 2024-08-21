@@ -120,7 +120,6 @@ class TalkToOllama < MonadicApp
     obj = session[:parameters]
     app = obj["app_name"]
 
-    initial_prompt = obj["initial_prompt"].gsub("{{DATE}}", Time.now.strftime("%Y-%m-%d"))
     temperature = obj["temperature"].to_f
     top_p = obj["top_p"].to_f
     top_p = 0.01 if top_p == 0.0
@@ -162,16 +161,12 @@ class TalkToOllama < MonadicApp
       session[:messages] << res
     end
 
-    if initial_prompt != ""
-      initial = { "role" => "system",
-                  "text" => initial_prompt,
-                  "html" => initial_prompt,
-                  "lang" => detect_language(initial_prompt) }
-    end
-
     session[:messages].each { |msg| msg["active"] = false }
-    latest_messages = session[:messages].last(context_size).each { |msg| msg["active"] = true }
-    context = [initial] + latest_messages
+    context = [session[:messages].first]
+    if session[:messages].size > 1
+      context += session[:messages][1..].last(context_size)
+    end
+    context.each { |msg| msg["active"] = true }
 
     headers = {
       "Content-Type" => "application/json"
