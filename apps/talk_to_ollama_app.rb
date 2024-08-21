@@ -38,7 +38,7 @@ class TalkToOllama < MonadicApp
 
   @settings = {
     "disabled": API_ENDPOINT.nil?,
-    "app_name": "▷ Ollama (Chat)",
+    "app_name": "▹ Ollama (Chat)",
     "context_size": 100,
     "initial_prompt": initial_prompt,
     "description": description,
