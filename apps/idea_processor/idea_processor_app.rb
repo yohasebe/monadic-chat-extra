@@ -48,7 +48,7 @@ class IdeaProcessor < MonadicApp
                   }
                 },
                 completion: {
-                  type: "string",
+                  type: "integer",
                   description: "The completion level of the discussion (from 0 to 10)."
                 }
               },
