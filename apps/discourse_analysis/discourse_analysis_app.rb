@@ -33,7 +33,7 @@ class DiscourseAnalysis < MonadicApp
     "response_format": {
       type: "json_schema",
       json_schema: {
-        name: "math_tutor_response",
+        name: "discourse_analysis_response",
         schema: {
           type: "object",
           properties: {
@@ -67,7 +67,8 @@ class DiscourseAnalysis < MonadicApp
               additionalProperties: false
             }
           },
-          required: ["message", "context"]
+          required: ["message", "context"],
+          additionalProperties: false
         },
         strict: true
       }

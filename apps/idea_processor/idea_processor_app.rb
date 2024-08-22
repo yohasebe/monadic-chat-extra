@@ -26,7 +26,7 @@ class IdeaProcessor < MonadicApp
     "response_format": {
       type: "json_schema",
       json_schema: {
-        name: "Idea Processor",
+        name: "idea_processor_response",
         schema: {
           type: "object",
           properties: {
@@ -37,25 +37,27 @@ class IdeaProcessor < MonadicApp
               type: "object",
               properties: {
                 summary: {
-                  type: "string"
+                  type: "string",
+                  description: "The summary of the discussion."
                 },
                 topics: {
                   type: "array",
                   items: {
-                    type: "string"
+                    type: "string",
+                    description: "The topics under discussion."
                   }
                 },
                 completion: {
-                  type: "enum",
-                  values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                  type: "string",
+                  description: "The completion level of the discussion (from 0 to 10)."
                 }
               },
               "required": ["summary", "topics", "completion"],
-              "additionalproperties": false
+              "additionalProperties": false
             }
           },
           "required": ["message", "context"],
-          "additionalproperties": false
+          "additionalProperties": false
         },
         "strict": true
       }
