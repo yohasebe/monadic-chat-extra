@@ -4,10 +4,36 @@ module MonadicAgent
   def syntree_build_agent(sentence:, model: "gpt-4o-2024-08-06", binary: false)
     return "Error: sentence text is required." if sentence.to_s.empty?
 
+    if binary
+      process_mode = <<~TEXT
+        The branching must be strictly binary throughout the nested structure. For instance, the sentence "She stopped and laughed" can be represented as follows:
+
+    ```
+    [S
+      [NP She]
+      [VP
+        [V stopped]
+        [ConjP
+          [Conj and]
+          [VP
+            [V laughed]
+          ]
+        ]
+      ]
+    ]
+    ```
+      TEXT
+    end
+
+    note_process_mode = binary ? process_mode : ""
+
     prompt = <<~TEXT
     You are an agent that draws syntax trees for sentences. The user will provide you with a sentence in English, and you should respond with a JSON object containing the following properties:
 
-    You create a syntax trees for sentences in English using the labeled bracket notation. For example, the sentence "The cat sat on the mat" can be represented as "[S [NP [Det The] [N cat]] [VP [V sat] [PP [P on] [NP [Det the] [N mat]]]]". But you do not need to use the bracket symbols in your response. The response must be strictly structured as the specified JSON schema. The schema allows recursive structures, so your response can be a tree-like nested structure of an arbitrary number of depths.
+    You create a syntax trees for sentences in English using the labeled bracket notation. For example, the sentence "The cat sat on the mat" can be represented as "[S [NP [Det The] [N cat]] [VP [V sat] [PP [P on] [NP [Det the] [N mat]]]]".But you do not need to use the bracket symbols in your response. The response must be strictly structured as the specified JSON schema. The schema allows recursive structures, so your response can be a tree-like nested structure of an arbitrary number of depths.
+
+    Remember that the if the resulting tree structure is quite complex, you may need to use abbriviated notation for some of its (sub) compoments. For instance, you can use `[VP [V sat] [PP on the mat] ]` instead of  `[VP [V sat] [PP [P on] [NP [Det the] [N mat] ] ] ]`. Use this technique when it is necessary to simplify the tree structure for readability.
+    #{note_process_mode}
     TEXT
 
     messages = [
