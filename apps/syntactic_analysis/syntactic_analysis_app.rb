@@ -50,6 +50,8 @@ class SyntaxTree < MonadicApp
     Please make sure to include the div with the class `toggle` to allow the user to toggle the syntax tree display (but DO NOT enclose the object the markdown code block symbols (```).
 
     Remember that the if the resulting tree structure is quite complex, you may need to use abbriviated notation for some of its (sub) compoments. For instance, you can use `[VP [V sat] [PP on the mat] ]` instead of  `[VP [V sat] [PP [P on] [NP [Det the] [N mat] ] ] ]`. Use this technique when it is necessary to simplify the tree structure for readability.
+
+    Also remember that when you revise the syntax tree, upon the user's request, you should not call the `syntree_build_agent` function again. Otherwise, only the sytanx code will be renewed, and the image will not be updated.
   TEXT
 
   @settings = {
@@ -111,13 +113,9 @@ class SyntaxTree < MonadicApp
                 type: "string",
                 description: "The format of the image (e.g., svg, png, jpg)",
                 enum: ["svg", "png", "jpg"]
-              },
-              wait: {
-                type: "number",
-                description: "The time to wait before rendering the image"
               }
             },
-            required: ["text", "format", "wait"],
+            required: ["text", "format"],
             additionalProperties: false
           }
         },
