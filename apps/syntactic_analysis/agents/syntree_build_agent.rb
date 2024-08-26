@@ -11,13 +11,17 @@ module MonadicAgent
 
     You create a syntax trees for sentences in English using the labeled bracket notation. For example, the sentence "The cat sat on the mat" can be represented as "[S [NP [Det The] [N cat]] [VP [V sat] [PP [P on] [NP [Det the] [N mat]]]]".But you do not need to use the bracket symbols in your response. The response must be strictly structured as the specified JSON schema. The schema allows recursive structures, so your response can be a tree-like nested structure of an arbitrary number of depths.
 
-    If the user requests for a more detailed analysis, it does not mean that you need to provide a different tree structure but rather that you reflain from using abbriviated notation for some of the compoments of the tree.
+    Be careful of the "garden path" sentences that may lead to misinterpretation. Here are some examples and valid representatoin of their structures:
+
+    - The horse raced past the barn fell: `[S [NP [NP [Det The] [N horse] ] [VP [V raced] [PP [P past] [NP [Det the] [N barn]]]] ] [VP [V fell] ] ]`
+    - The old man the boat: `[S [NP  The old ] [VP [V man] [NP [Det the] [N boat]] ] ]`
+    - The complex houses married and single soldiers and their families: `[S [NP [Det The] [N complex] ] [VP [V houses] [NP [NP [AdjP [Adj married] [ConjP [Conj and] [Adj single] ] ] [N soldiers] ] [ConjP [Conj and] [NP [Det their] [N families] ] ] ] ] ]`
 
     Remember that the if the resulting tree structure is quite complex, you may need to use abbriviated notation for some of its (sub) compoments. For instance, you can use `[VP [V sat] [PP on the mat] ]` instead of  `[VP [V sat] [PP [P on] [NP [Det the] [N mat] ] ] ]`. Use this technique when it is necessary to simplify the tree structure for readability.
 
-    Avoid nested structures where a node has a single child with the same label. For example, `[S [S ...]]` is not allowed. Each level should introduce a new grammatical element or phrase type. This is not limited to the top level of the structure. The following structure is also invalid: `[VP [V houses] [NP [NP [NP married and single soldiers] ] ] ]` since the NP node has a single child with the same label.
+    Avoid nested structures where a node has a single child with the same label. For example, `[S [S ...]]` is not allowed since the top level node is labeled "S" and its only child node is also labeled "S". The following structure is also invalid: `[VP [V houses] [NP [NP married and single soldiers ] ] ]` since the left-most "NP" node has its only child node with the same label "NP".
 
-        Punctuation marks such as ".", ",", "?", "!", ":", ";" should not be included as part of the structure.
+    Punctuation marks such as ".", ",", "?", "!", ":", ";" should not be included as part of the structure.
 
     TEXT
 
@@ -44,7 +48,7 @@ module MonadicAgent
       TEXTB
     else
       prompt << <<~TEXTNB
-        Binary branching is preferred throughout the nested structure but coordinating conjunctions of more than two nodes are allowed. For instance, the sentence "She stopped and laughed" can be represented as follows:
+        Binary branching is preferred throughout the nested structure, but structures with more than two child nodes are allowed. For instance, the sentence "She stopped and laughed" can be represented as follows:
 
         ```
         [S
@@ -76,11 +80,15 @@ module MonadicAgent
 
     recursion = if binary
                   {
-                    left: { type: "object", item: { "$ref": "#/properties/content" } },
-                    right: { type: "object", item: { "$ref": "#/properties/content" } }
+                    left: { "$ref": "#/$defs/item" },
+                    right: { "$ref": "#/$defs/item" }
                   }
                 else
-                  { children: { type: "array", items: { "$ref": "#/properties/content" } } }
+                  {
+                    first: { "$ref": "#/$defs/item" },
+                    second: { "$ref": "#/$defs/item" },
+                    others: { type: "array", items: { "$ref": "#/$defs/item" } }
+                  }
                 end
 
     response_format = {
@@ -91,23 +99,35 @@ module MonadicAgent
         schema: {
           type: "object",
           properties: {
-            label: {
-              type: "string",
-              description: "The label of the syntactic node, for example S, NP, VP, etc."
-            },
-            content: {
-              type: "object",
-              description: "The syntactic node.",
-              anyOf: [
-                {
-                  "type": "string",
-                  "description": "The content of the syntactic node, for example a word or a phrase."
-                },
-                recursion
-              ]
+            top: {
+              "$ref": "#/$defs/item"
             }
           },
-          required: ["label", "content"],
+          "$defs": {
+            item: {
+              type: "object",
+              properties: {
+                label: {
+                  type: "string",
+                  description: "The label of the syntactic node, for example S, NP, VP, etc."
+                },
+                content: {
+                  type: "object",
+                  description: "The syntactic node.",
+                  anyOf: [
+                    {
+                      "type": "string",
+                      "description": "The content of the syntactic node, for example a word or a phrase."
+                    },
+                    recursion
+                  ]
+                }
+              },
+              required: ["label", "content"],
+              additionalProperties: false
+            }
+          },
+          required: ["top"],
           additionalProperties: false
         },
         strict: true
