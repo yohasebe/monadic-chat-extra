@@ -8,7 +8,7 @@ module MonadicAgent
                       MonadicApp::LOCAL_SHARED_VOL
                     end
 
-    max_retrial = 20
+    max_retrials = 10
     tempname = Time.now.to_i.to_s
 
     write_to_file(filename: tempname, extension: "txt", text: text)
@@ -16,7 +16,7 @@ module MonadicAgent
     filepath1 = File.join(shared_volume, tempname + ".txt")
 
     success1 = false
-    max_retrial.times do
+    max_retrials.times do
       if File.exist?(filepath1)
         success1 = true
         break
@@ -39,7 +39,7 @@ module MonadicAgent
           filepath2 = File.join(shared_volume, tempname + "." + format)
 
           success2 = false
-          max_retrial.times do
+          max_retrials.times do
             if File.exist?(filepath2)
               success2 = true
               break

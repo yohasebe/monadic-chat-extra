@@ -14,7 +14,9 @@ class SyntaxTree < MonadicApp
 
     The function will return a JSON object representing the syntax tree of the sentence.
 
-    Upon receiving the JSON object, call `syntree_render_agent` with the two parameters: the labeled blacket notation of the JSON object and the format of the image (svg, png, or jpg).
+    Upon receiving the JSON object, check if the structure is linguistically valid. Use your wide and deep knowledge of Generative Grammar. If the structure is not valid enough, call the function `syntree_build_agent` again with your comments or requests to rectify the structure. If this attempt to build a valid syntax tree fails, report the issue to the user.
+
+    If the structure is linguistically valid enough, call `syntree_render_agent` with the two parameters: the labeled blacket notation of the JSON object and the format of the image, which must be svg.
 
     Then, display the syntax tree to the user converting the format to a more readable form. The response format is given below. Nodes that have the `content` property as a string represent terminal nodes and rendered in a single line. Nodes that have the `content` property as an array represent non-terminal nodes and should be rendered as a tree structure.
 
@@ -49,7 +51,9 @@ class SyntaxTree < MonadicApp
 
     Please make sure to include the div with the class `toggle` to allow the user to toggle the syntax tree display (but DO NOT enclose the object the markdown code block symbols (```).
 
-    Also remember that when you revise the syntax tree, upon the user's request, you should not call the `syntree_build_agent` function again. Otherwise, only the sytanx code will be renewed, and the image will not be updated.
+    Also remember that when you revise the syntax tree, upon the user's request, you should not call the `syntree_build_agent` function again. Otherwise, only the sytanx code will be renewed, and the SVG image will not be updated.
+
+    If the user asks for stylistic modifications to the syntax tree SVG, read the svg file with the `fetch_text_from_file and modifiy the content. Then overwrite the file with the `write_to_file` function. When finished, `write_to_file` function gives you the new file name. Finally respond to the user using the above format with the new updated svg filename.
   TEXT
 
   @settings = {
@@ -114,6 +118,54 @@ class SyntaxTree < MonadicApp
               }
             },
             required: ["text", "format"],
+            additionalProperties: false
+          }
+        },
+        strict: true
+      },
+      {
+        type: "function",
+        function:
+        {
+          name: "fetch_text_from_file",
+          description: "Read the text content of a file",
+          parameters: {
+            type: "object",
+            properties: {
+              file: {
+                type: "string",
+                description: "The filename to read"
+              }
+            },
+            required: ["file"],
+            additionalProperties: false
+          }
+        },
+        strict: true
+      },
+      {
+        type: "function",
+        function:
+        {
+          name: "write_to_file",
+          description: "Write the text content to a file",
+          parameters: {
+            type: "object",
+            properties: {
+              filename: {
+                type: "string",
+                description: "The base filename (without extension)"
+              },
+              extension: {
+                type: "string",
+                description: "The file extension"
+              },
+              text: {
+                type: "string",
+                description: "The text content to write"
+              }
+            },
+            required: ["filename", "extension", "text"],
             additionalProperties: false
           }
         },
