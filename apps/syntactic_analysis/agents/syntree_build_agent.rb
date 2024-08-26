@@ -80,14 +80,14 @@ module MonadicAgent
 
     recursion = if binary
                   {
-                    left: { "$ref": "#/$defs/item" },
-                    right: { "$ref": "#/$defs/item" }
+                    left: { type: "object", item: { "$ref": "#" } },
+                    right: { type: "object", item: { "$ref": "#" } }
                   }
                 else
                   {
-                    first: { "$ref": "#/$defs/item" },
-                    second: { "$ref": "#/$defs/item" },
-                    others: { type: "array", items: { "$ref": "#/$defs/item" } }
+                    left: { type: "object", item: { "$ref": "#" } },
+                    right: { type: "object", item: { "$ref": "#" } },
+                    others: { type: "array", items: { "$ref": "#" } }
                   }
                 end
 
@@ -99,35 +99,23 @@ module MonadicAgent
         schema: {
           type: "object",
           properties: {
-            top: {
-              "$ref": "#/$defs/item"
-            }
-          },
-          "$defs": {
-            item: {
+            label: {
+              type: "string",
+              description: "The label of the syntactic node, for example S, NP, VP, etc."
+            },
+            content: {
               type: "object",
-              properties: {
-                label: {
-                  type: "string",
-                  description: "The label of the syntactic node, for example S, NP, VP, etc."
+              description: "The syntactic node.",
+              anyOf: [
+                {
+                  "type": "string",
+                  "description": "The content of the syntactic node, for example a word or a phrase."
                 },
-                content: {
-                  type: "object",
-                  description: "The syntactic node.",
-                  anyOf: [
-                    {
-                      "type": "string",
-                      "description": "The content of the syntactic node, for example a word or a phrase."
-                    },
-                    recursion
-                  ]
-                }
-              },
-              required: ["label", "content"],
-              additionalProperties: false
+                recursion
+              ]
             }
           },
-          required: ["top"],
+          required: ["label", "content"],
           additionalProperties: false
         },
         strict: true
