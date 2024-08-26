@@ -25,36 +25,27 @@ module MonadicAgent
     end
 
     if success1
+      command = "bash -c 'rsyntaxtree -f #{format} -o . -u #{tempname} #{tempname}.txt'"
       success_msg1 = "Syntree generated successfully"
-      command = "bash -c 'rsyntaxtree -f #{format} -o . #{tempname}.txt'"
       res1 = send_command(command: command, container: "syntree", success: success_msg1)
 
       if /\A#{success_msg1}/ =~ res1.strip
-        command = "bash -c 'mv syntree.#{format} #{tempname}.#{format}'"
-        success_msg2 = "Syntax tree generated successfully as #{tempname}.#{format}"
-        res2 = send_command(command: command, container: "syntree", success: success_msg2)
+        filepath2 = File.join(shared_volume, tempname + "." + format)
 
-        if /\A#{success_msg2}/ =~ res2.strip
-
-          filepath2 = File.join(shared_volume, tempname + "." + format)
-
-          success2 = false
-          max_retrials.times do
-            if File.exist?(filepath2)
-              success2 = true
-              break
-            end
-            sleep 1
+        success2 = false
+        max_retrials.times do
+          if File.exist?(filepath2)
+            success2 = true
+            break
           end
-
-          if success2
-            "Syntax tree generated successfully as #{tempname + "." + format}"
-          else
-            "Error: syntax tree generation failed. #{res2}"
-          end
+          sleep 1
         end
-      else
-        "Error: syntax tree generation failed. #{res1}"
+
+        if success2
+          "Syntax tree generated successfully as #{tempname + "." + format}"
+        else
+          "Error: syntax tree generation failed. #{res2}"
+        end
       end
     else
       "Error: syntax tree generation failed. Temp file not found."

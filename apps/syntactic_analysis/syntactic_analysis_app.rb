@@ -16,7 +16,7 @@ class SyntaxTree < MonadicApp
 
     Upon receiving the JSON object, closely examine if the structure is linguistically valid from a professional perspective. Use professional knowledge of theoretical linguistics, especially specialized in Chomsky's Generative Grammar. If the structure is not valid and ellegant enough, call the function `syntree_build_agent` again with your comments or requests to improve the structure.
 
-    If the structure is linguistically valid enough, call `syntree_render_agent` with the two parameters: the labeled blacket notation of the JSON object and the format of the image, which must be svg. This function will generate an image file of the syntax tree and return the file path.
+    If the structure is linguistically valid enough, call `syntree_render_agent` with the labeled blacket notation of the JSON object. This function will generate an SVG file of the syntax tree and return the file name (SVG_FILE).
 
     Then, display the syntax tree to the user converting the format to a more readable form. The response format is given below. Nodes that have the `content` property as a string represent terminal nodes and rendered in a single line. Nodes that have the `content` property as an array represent non-terminal nodes and should be rendered as a tree structure.
 
@@ -46,7 +46,7 @@ class SyntaxTree < MonadicApp
     </code></pre></div>
 
     <div class="generated_image">
-      <img src='SYNTREE_FILE' />
+      <img src='SVG_FILE' />
     </div>
 
     Please make sure to include the div with the class `toggle` to allow the user to toggle the syntax tree display (but DO NOT enclose the object the markdown code block symbols (```).
@@ -54,8 +54,6 @@ class SyntaxTree < MonadicApp
     If the user requests for a more detailed analysis, it does not mean that you need to provide a different tree structure but rather that you reflain from using abbriviated notation for some of the compoments of the tree.
 
     In addition to the the JSON object and the SVG image file, you should also display any analytical comments you may have about the syntax tree (e.g. decisions you made in chosing from multiple possible structures). Also include your evaluation about how difficult the sentence is to parse for any average English speaker and the binary mode you used to build the tree.
-
-    Avoid nested structures where a node has a single child with the same label. For example, `[S [S ...]]` is not allowed since the top level node is labeled "S" and its only child node is also labeled "S". The following structure is also invalid: `[VP [V houses] [NP [NP married and single soldiers ] ] ]` since the left-most "NP" node has its only child node with the same label "NP".
 
     If the user argues a given structure is not valid, request the user to provide an explanation of why they think so. If the user provides a valid explanation, call the `syntree_build_agent` function with the user's explanation, call the `syntree_render_agent` function with the new syntax tree, and finally display the new syntax tree code and image with your comments and evaluation to the user.
 
@@ -118,14 +116,9 @@ class SyntaxTree < MonadicApp
               text: {
                 type: "string",
                 description: "The labeled bracket notation of the syntax tree"
-              },
-              format: {
-                type: "string",
-                description: "The format of the image (e.g., svg, png, jpg)",
-                enum: ["svg", "png", "jpg"]
               }
             },
-            required: ["text", "format"],
+            required: ["text"],
             additionalProperties: false
           }
         },

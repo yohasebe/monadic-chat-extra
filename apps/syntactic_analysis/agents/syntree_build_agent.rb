@@ -19,7 +19,7 @@ module MonadicAgent
 
     Remember that the if the resulting tree structure is quite complex, you may need to use abbriviated notation for some of its (sub) compoments. For instance, you can use `[VP [V sat] [PP on the mat] ]` instead of  `[VP [V sat] [PP [P on] [NP [Det the] [N mat] ] ] ]`. Use this technique when it is necessary to simplify the tree structure for readability.
 
-    Avoid nested structures where a node has a single child with the same label. For example, `[S [S ...]]` is not allowed since the top level node is labeled "S" and its only child node is also labeled "S". The following structure is also invalid: `[VP [V houses] [NP [NP married and single soldiers ] ] ]` since the left-most "NP" node has its only child node with the same label "NP".
+    Do not create nested structures where a node has an only child with the same label. Use `[S ...]` instead of `[X [X ...]]` and use `[X [Y ...] [Z ...] ]` instead of `[X [Y ...] [Z [Z ...] ]`
 
     Punctuation marks such as ".", ",", "?", "!", ":", ";" should not be included as part of the structure.
 
@@ -48,7 +48,7 @@ module MonadicAgent
       TEXTB
     else
       prompt << <<~TEXTNB
-        Binary branching is preferred throughout the nested structure, but structures with more than two child nodes are allowed. For instance, the sentence "She stopped and laughed" can be represented as follows:
+        Create nodes with more than two children when necessary. For instance, the sentence "She stopped and laughed" can be represented as below. Coordinating conjunctions such as "and" should be included in the structure.
 
         ```
         [S
@@ -60,6 +60,9 @@ module MonadicAgent
           ]
         ]
         ```
+
+        Thus, an "NP" node representing "apples and oranges", for example, should have two three children nodes, one for "apples", one for "and", one for "oranges".
+
       TEXTNB
     end
 
