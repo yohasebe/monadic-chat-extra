@@ -68,7 +68,6 @@ services/ollama/ollama/*
 .solargraph.yml
 
 rsync.sh
-compose.yml
 monadic
 monadic.gz
 *.md
@@ -76,3 +75,4 @@ monadic.gz
 *.mp3
 *.mp4
 
+./compose.yml
