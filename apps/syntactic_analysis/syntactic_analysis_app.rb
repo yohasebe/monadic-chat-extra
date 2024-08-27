@@ -49,7 +49,7 @@ class SyntaxTree < MonadicApp
       <img src='SVG_FILE' />
     </div>
 
-    Please make sure to include the div with the class `toggle` to allow the user to toggle the syntax tree display (but DO NOT enclose the object the markdown code block symbols (```).
+    Please make sure to include the div with the class `toggle` to allow the user to toggle the syntax tree display (but DO NOT enclose the object the markdown code block symbols (```). Also, SVG_FILE should be replaced with the actual file name of the generated SVG image.
 
     If the user requests for a more detailed analysis, it does not mean that you need to provide a different tree structure but rather that you reflain from using abbriviated notation for some of the compoments of the tree.
 
