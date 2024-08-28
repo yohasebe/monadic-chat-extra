@@ -1,6 +1,4 @@
 class TalkToOllama < MonadicApp
-  include UtilitiesHelper
-
   ollama_endpoint = nil
   endpoints = [
     "http://host.docker.internal:11434/api",
