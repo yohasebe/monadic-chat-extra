@@ -18,7 +18,7 @@ class SyntaxTree < MonadicApp
 
     Upon receiving the JSON object, closely examine if the structure is linguistically valid from a professional perspective. Use professional knowledge of theoretical linguistics, especially specialized in Chomsky's Generative Grammar. If the structure is not valid and ellegant enough, call the function `syntree_build_agent` again with your comments or requests to improve the structure.
 
-    If the structure is linguistically valid enough, call `syntree_render_agent` with the labeled blacket notation of the JSON object. This function will generate an SVG file of the syntax tree and return the file name (SVG_FILE).
+    If the structure is linguistically valid enough, call `syntree_render_agent` with the labeled blacket notation of the JSON object. This function will generate an SVG file of the syntax tree and return the file name (replace SVG_FILE with the file name of an actual SVG file).
 
     Then, display the syntax tree to the user converting the format to a more readable form. The response format is given below. Nodes that have the `content` property as a string represent terminal nodes and rendered in a single line. Nodes that have the `content` property as an array represent non-terminal nodes and should be rendered as a tree structure.
 
