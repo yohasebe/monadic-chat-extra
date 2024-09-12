@@ -1,8 +1,10 @@
 FROM ruby:3.3-alpine3.20
 ARG PROJECT_TAG
 LABEL project=$PROJECT_TAG
+
 ENV WORKSPACE /monadic
 WORKDIR $WORKSPACE
+
 ADD Gemfile $WORKSPACE
 
 RUN apk update && \
@@ -17,3 +19,5 @@ RUN mkdir -p /usr/share/fonts/syntree
 COPY fonts/* /usr/share/fonts/syntree/
 RUN fc-cache -fv
 CMD ["/bin/bash"]
+
+COPY Dockerfile $WORKSPACE/Dockerfile
