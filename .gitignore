@@ -76,4 +76,4 @@ monadic.gz
 *.mp4
 
 ./compose.yml
-./.ipynb_checkpoints
+/.ipynb_checkpoints
