@@ -14,7 +14,7 @@ class TalkToOllama < MonadicApp
   models = OllamaHelper.list_models
 
   @settings = {
-    "disabled": modles.empty?,
+    "disabled": models.empty?,
     "app_name": "▹ Ollama (Chat)",
     "context_size": 100,
     "initial_prompt": initial_prompt,
