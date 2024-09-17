@@ -1,4 +1,4 @@
-class SyntaxTree < MonadicApp
+class SyntacticAnalysis < MonadicApp
   include OpenAIHelper
 
   icon = "<i class='fa-solid fa-tree'></i>"

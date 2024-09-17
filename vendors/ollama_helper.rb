@@ -3,7 +3,7 @@ module OllamaHelper
   READ_TIMEOUT = 60
   WRITE_TIMEOUT = 60
   MAX_RETRIES = 5
-  RETRY_DELAY = 1
+  RETRY_DELAY = 2
   MAX_FUNC_CALLS = 5
 
   ollama_endpoint = nil
@@ -43,7 +43,7 @@ module OllamaHelper
     http = HTTP.headers(headers)
 
     begin
-      res = http.get(target_uri)
+      res = http.timeout(connect: OPEN_TIMEOUT, write: WRITE_TIMEOUT, read: READ_TIMEOUT).get(target_uri)
 
       if res.status.success?
         model_data = JSON.parse(res.body)
