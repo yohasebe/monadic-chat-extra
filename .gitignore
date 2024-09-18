@@ -11,6 +11,7 @@ eslint.config.*
 *.ipynb
 *.json
 *.pdf
+*.log
 
 /.config
 /coverage/
