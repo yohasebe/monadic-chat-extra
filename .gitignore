@@ -78,3 +78,5 @@ monadic.gz
 
 ./compose.yml
 /.ipynb_checkpoints
+
+id_*
