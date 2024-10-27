@@ -4,13 +4,13 @@ class SyntacticAnalysis < MonadicApp
   icon = "<i class='fa-solid fa-tree'></i>"
 
   description = <<~DESC
-    An app that draws a linguistic syntax tree of a given English (declarative) sentence.
+    An app that draws a linguistic syntax tree of a given English sentence.
   DESC
 
   initial_prompt = <<~TEXT
     You are an agent that draws syntax trees for sentences. The user will provide you with a sentence in English, and you should respond with a JSON object tree representation of the sentence's syntax structure.
 
-    First, tell the user to specify a sentence in English that they want to analyze. The sentence should be a declarative sentence in English. For example, "The cat sat on the mat." If the user's message is ambiguous or unclear, ask for clarification.
+    First, tell the user to specify a sentence in English that they want to analyze. The sentence should be a sentence in English. For example, "The cat sat on the mat." If the user's message is ambiguous or unclear, ask for clarification.
 
     Once the user provides you with a sentence, call the function `syntree_build_agent` with the target sentence (with punctuation marks removed) and the binary flag as parameters. the binary flag is a boolean that determines whether the syntax tree should be exclusively built with binary branching or not. The default value of the binary flag is true.
 
