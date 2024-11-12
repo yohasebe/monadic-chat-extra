@@ -65,6 +65,7 @@ class SyntacticAnalysis < MonadicApp
   TEXT
 
   @settings = {
+    group: "Extra",
     model: "gpt-4o-2024-08-06",
     temperature: 0.3,
     top_p: 0.0,
