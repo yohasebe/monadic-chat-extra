@@ -14,7 +14,7 @@ services:
     networks:
       - monadic-chat-network
     volumes:
-        - ./ollama_data:/root/.ollama
-        - data:/monadic/data
-        - ~/monadic/data:/monadic/data
+      - ./ollama_data:/root/.ollama
+      - data:/monadic/data
+      - ~/monadic/data:/monadic/data
     entrypoint: ["/usr/bin/bash", "-c", "/entrypoint.sh"]
