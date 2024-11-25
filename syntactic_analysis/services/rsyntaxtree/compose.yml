@@ -7,8 +7,8 @@ services:
       args:
         PROJECT_TAG: "monadic-chat"
     container_name: monadic-chat-syntree-container
-    depends_on:
-      - ruby_service
+    # depends_on:
+    #   - ruby_service
     networks:
       - monadic-chat-network
     volumes:
