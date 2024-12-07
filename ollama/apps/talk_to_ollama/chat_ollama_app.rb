@@ -1,4 +1,4 @@
-class TalkToOllama < MonadicApp
+class ChatOllama < MonadicApp
   include OllamaHelper
 
   icon = "<i class='fa-solid fa-horse'></i>"
@@ -16,7 +16,7 @@ class TalkToOllama < MonadicApp
   @settings = {
     "group": "Extra",
     "disabled": models.empty?,
-    "app_name": "Ollama (Chat)",
+    "app_name": "Chat (Ollama)",
     "context_size": 100,
     "initial_prompt": initial_prompt,
     "description": description,
