@@ -9,8 +9,6 @@ services:
     container_name: monadic-chat-ollama-container
     ports:
       - "11434:11434"
-    # depends_on:
-    #   - ruby_service
     networks:
       - monadic-chat-network
     volumes:
