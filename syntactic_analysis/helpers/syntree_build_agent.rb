@@ -4,8 +4,13 @@ module MonadicAgent
   def syntree_build_agent(sentence:, model: "gpt-4o-2024-08-06", binary: false)
     return "Error: sentence text is required." if sentence.to_s.empty?
 
+    prompt_suffix = <<~TEXT
+      Use square brackets `[ ... ]` to represent the syntax tree structure. Do not use parentheses. For example, a simple sentence like "The cat sat on the mat." can be represented as `[S [NP [Det The] [N cat]] [VP [V sat] [PP [P on] [NP [Det the] [N mat]]]]]`.
+    TEXT
+
+
     prompt = <<~TEXT
-    You are an agent that draws syntax trees for sentences. You are capable of parse English sentences with a vast ammount of knowledge about theoretical linguistics based on Chomsky's Generative Grammar.
+    You are an agent that draws syntax trees for sentences. You are capable of parse English sentences with a vast amount of knowledge about theoretical linguistics based on Chomsky's Generative Grammar.
 
     The user will provide you with a sentence in English, and you should respond with a JSON object containing the following properties:
 
@@ -17,7 +22,7 @@ module MonadicAgent
     - The old man the boat: `[S [NP  The old ] [VP [V man] [NP [Det the] [N boat]] ] ]`
     - The complex houses married and single soldiers and their families: `[S [NP [Det The] [N complex] ] [VP [V houses] [NP [NP [AdjP [Adj married] [ConjP [Conj and] [Adj single] ] ] [N soldiers] ] [ConjP [Conj and] [NP [Det their] [N families] ] ] ] ] ]`
 
-    Remember that the if the resulting tree structure is quite complex, you may need to use abbriviated notation for some of its (sub) compoments. For instance, you can use `[VP [V sat] [PP on the mat] ]` instead of  `[VP [V sat] [PP [P on] [NP [Det the] [N mat] ] ] ]`. Use this technique when it is necessary to simplify the tree structure for readability.
+    Remember that the if the resulting tree structure is quite complex, you may need to use abbriviated notation for some of its (sub) components. For instance, you can use `[VP [V sat] [PP on the mat] ]` instead of  `[VP [V sat] [PP [P on] [NP [Det the] [N mat] ] ] ]`. Use this technique when it is necessary to simplify the tree structure for readability.
 
     Do not create nested structures where a node has an only child with the same label. Use `[S ...]` instead of `[X [X ...]]` and use `[X [Y ...] [Z ...] ]` instead of `[X [Y ...] [Z [Z ...] ]`
 
