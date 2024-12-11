@@ -66,8 +66,8 @@ class SyntacticAnalysis < MonadicApp
 
   @settings = {
     group: "Extra",
-    model: "gpt-4o-2024-08-06",
-    temperature: 0.3,
+    model: "gpt-4o-2024-11-20",
+    temperature: 0.0,
     top_p: 0.0,
     max_tokens: 4000,
     context_size: 5,
@@ -98,7 +98,7 @@ class SyntacticAnalysis < MonadicApp
               },
               binary: {
                 type: "boolean",
-                description: "Whether to build the structuren exclusively with binary branching"
+                description: "Whether to build the structuren exclusively with binary branching [default: true]"
               }
             },
             required: ["sentence", "binary"],
