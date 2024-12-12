@@ -6,6 +6,8 @@ module MonadicAgent
 
     prompt_suffix = <<~TEXT
       Use square brackets `[ ... ]` to represent the syntax tree structure. Do not use parentheses. For example, a simple sentence like "The cat sat on the mat." can be represented as `[S [NP [Det The] [N cat]] [VP [V sat] [PP [P on] [NP [Det the] [N mat]]]]]`.
+
+        Always make the root node branching. Do not create nested structures where a node has an only child with the same label. Use `[X [X ...] [Y ...] ]` instead of `[S [X ...] ]`. Also avoid structures containing `[X [Y ...]] as much as possible even if the `X` is no the root node.
     TEXT
 
 
@@ -82,6 +84,10 @@ module MonadicAgent
           ### Sentence to analyze
 
           #{sentence}
+
+          ### Notes
+          
+          #{prompt_suffix}
         TEXT
       }
     ]
