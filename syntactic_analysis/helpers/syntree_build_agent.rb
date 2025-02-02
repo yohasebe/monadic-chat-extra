@@ -1,6 +1,4 @@
 module MonadicAgent
-  extend BasicAgent
-
   def syntree_build_agent(sentence:, model: "gpt-4o-2024-08-06", binary: false)
     return "Error: sentence text is required." if sentence.to_s.empty?
 
@@ -136,8 +134,8 @@ module MonadicAgent
       }
     }
 
-    BasicAgent.send_query({ messages: messages,
-                            response_format: response_format,
-                            model: model })
+    send_query({ messages: messages,
+                 response_format: response_format,
+                 model: model })
   end
 end

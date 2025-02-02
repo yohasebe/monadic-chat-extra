@@ -33,86 +33,82 @@ module OllamaHelper
 
   attr_reader :models
 
-  def self.list_models
-    headers = {
-      "Content-Type": "application/json"
-    }
+  class << self
+    attr_reader :cached_models
 
-    target_uri = "#{API_ENDPOINT}/tags"
+    def vendor_name
+      "CommandR"
+    end
 
-    http = HTTP.headers(headers)
+    def list_models
+      # Return cached models if they exist
+      return @cached_models if @cached_models
 
-    begin
-      res = http.timeout(connect: OPEN_TIMEOUT, write: WRITE_TIMEOUT, read: READ_TIMEOUT).get(target_uri)
+      headers = {
+        "Content-Type": "application/json"
+      }
 
-      if res.status.success?
-        model_data = JSON.parse(res.body)
-        models = []
-        model_data["models"].each do |model|
-          models << model["model"] || model["name"]
+      target_uri = "#{API_ENDPOINT}/tags"
+
+      http = HTTP.headers(headers)
+
+      begin
+        res = http.timeout(connect: OPEN_TIMEOUT, write: WRITE_TIMEOUT, read: READ_TIMEOUT).get(target_uri)
+
+        if res.status.success?
+          model_data = JSON.parse(res.body)
+          @cached_models = model_data["models"].map do |model|
+            model["name"]
+          end
         end
+        @cached_models
+      rescue HTTP::Error, HTTP::TimeoutError
+        []
       end
-      models
-    rescue HTTP::Error, HTTP::TimeoutError
-      []
+    end
+
+    # Method to manually clear the cache if needed
+    def clear_models_cache
+      @cached_models = nil
     end
   end
 
-  def process_json_data(app, session, body, _call_depth, &block)
-    obj = session[:parameters]
+  # No streaming plain text completion/chat call
+  def send_query(options, model: nil)
+    headers = {
+      "Content-Type" => "application/json"
+    }
 
-    buffer = String.new
-    texts = []
-    finish_reason = nil
+    body = {
+      "model" => model,
+      "stream" => false,
+      "messages" => []
+    }
 
-    body.each do |chunk|
-      begin
-        buffer << chunk
-        json = JSON.parse(buffer)
-        buffer = String.new
-        finish_reason = json["done"] ? "stop" : nil
-        if json.dig("message", "content")
-          fragment = json.dig("message", "content").to_s
-          res = {
-            "type" => "fragment",
-            "content" => fragment
-          }
-          block&.call res
-          texts << fragment
-        end
-      rescue JSON::ParserError
-        buffer << chunk
+    body.merge!(options)
+    target_uri = "#{API_ENDPOINT}/chat"
+    http = HTTP.headers(headers)
+
+    success = false
+    MAX_RETRIES.times do
+      res = http.timeout(connect: OPEN_TIMEOUT,
+                         write: WRITE_TIMEOUT,
+                         read: READ_TIMEOUT).post(target_uri, json: body)
+      if res.status.success?
+        success = true
+        break
       end
-    rescue StandardError => e
-      pp e.message
-      pp e.backtrace
-      pp e.inspect
+      sleep RETRY_DELAY
     end
 
-    result = texts.join("")
-
-    if result && obj["monadic"]
-      modified = APPS[app].monadic_map(result)
-      result = modified
-    end
-
-    if result
-      res = { "type" => "message", "content" => "DONE", "finish_reason" => finish_reason }
-      block&.call res
-      result = {
-        "choices" => [{
-          "message" => {
-            "content" => result
-          },
-          "finish_reason" => finish_reason
-        }]
-      }
-      [result]
+    if res.status.success?
+      JSON.parse(res.body).dig("choices", 0, "message", "content")
     else
-      res = { "type" => "message", "content" => "DONE" }
-      block&.call res
-      [res]
+      pp JSON.parse(res.body)["error"]
+      "ERROR: #{JSON.parse(res.body)["error"]}"
     end
+  rescue StandardError
+    "Error: The request could not be completed."
   end
 
   def api_request(role, session, call_depth: 0, &block)
@@ -250,5 +246,61 @@ module OllamaHelper
     block&.call res
     [res]
   end
-end
 
+  def process_json_data(app, session, body, _call_depth, &block)
+    obj = session[:parameters]
+
+    buffer = String.new
+    texts = []
+    finish_reason = nil
+
+    body.each do |chunk|
+      begin
+        buffer << chunk
+        json = JSON.parse(buffer)
+        buffer = String.new
+        finish_reason = json["done"] ? "stop" : nil
+        if json.dig("message", "content")
+          fragment = json.dig("message", "content").to_s
+          res = {
+            "type" => "fragment",
+            "content" => fragment
+          }
+          block&.call res
+          texts << fragment
+        end
+      rescue JSON::ParserError
+        buffer << chunk
+      end
+    rescue StandardError => e
+      pp e.message
+      pp e.backtrace
+      pp e.inspect
+    end
+
+    result = texts.join("")
+
+    if result && obj["monadic"]
+      modified = APPS[app].monadic_map(result)
+      result = modified
+    end
+
+    if result
+      res = { "type" => "message", "content" => "DONE", "finish_reason" => finish_reason }
+      block&.call res
+      result = {
+        "choices" => [{
+          "message" => {
+            "content" => result
+          },
+          "finish_reason" => finish_reason
+        }]
+      }
+      [result]
+    else
+      res = { "type" => "message", "content" => "DONE" }
+      block&.call res
+      [res]
+    end
+  end
+end
