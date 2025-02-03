@@ -130,7 +130,7 @@ module MonadicAgent
           required: ["label", "content"],
           additionalProperties: false
         },
-        strict: true
+        strict: false
       }
     }
 
