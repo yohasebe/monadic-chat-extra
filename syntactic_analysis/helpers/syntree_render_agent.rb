@@ -9,6 +9,7 @@ module MonadicAgent
                     end
 
     max_retrials = 10
+    sleep_interval = 1.5
     tempname = Time.now.to_i.to_s
 
     write_to_file(filename: tempname, extension: "txt", text: text)
@@ -21,7 +22,7 @@ module MonadicAgent
         success1 = true
         break
       end
-      sleep 1
+      sleep sleep_interval
     end
 
     if success1
@@ -38,13 +39,13 @@ module MonadicAgent
             success2 = true
             break
           end
-          sleep 1
+          sleep sleep_interval
         end
 
         if success2
           "Syntax tree generated successfully as #{tempname + "." + format}"
         else
-          "Error: syntax tree generation failed. #{res2}"
+          "Error: syntax tree generation failed: #{res1}"
         end
       end
     else
