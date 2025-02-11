@@ -2,7 +2,7 @@ FROM ollama/ollama:latest
 ARG PROJECT_TAG
 LABEL project=$PROJECT_TAG
 
-ENV WORKSPACE /monadic
+ENV WORKSPACE=/monadic
 WORKDIR $WORKSPACE
 
 COPY entrypoint.sh /entrypoint.sh
