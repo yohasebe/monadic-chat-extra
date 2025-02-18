@@ -26,6 +26,7 @@ class ChatOllama < MonadicApp
     "initiate_from_assistant": false,
     "toggle": true,
     "image": true,
-    "models": models
+    "models": models,
+    "model": models.first,
   }
 end
