@@ -69,7 +69,6 @@ class SyntacticAnalysis < MonadicApp
     model: "gpt-4o-2024-11-20",
     models: OpenAIHelper.list_models,
     temperature: 0.0,
-    top_p: 0.0,
     max_tokens: 4000,
     context_size: 5,
     initial_prompt: initial_prompt,

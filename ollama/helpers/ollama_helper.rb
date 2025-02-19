@@ -122,8 +122,6 @@ module OllamaHelper
     app = obj["app_name"]
 
     temperature = obj["temperature"].to_f
-    top_p = obj["top_p"].to_f
-    top_p = 0.01 if top_p == 0.0
     context_size = obj["context_size"].to_i
     request_id = SecureRandom.hex(4)
 
@@ -178,7 +176,6 @@ module OllamaHelper
       "stream" => true,
       "options" => {
         "temperature" => temperature,
-        "top_p" => top_p
       }
     }
 
