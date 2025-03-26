@@ -14,19 +14,19 @@ class ChatOllama < MonadicApp
   models = OllamaHelper.list_models
 
   @settings = {
-    "group": "Extra",
-    "disabled": models.empty?,
-    "app_name": "Chat (Ollama)",
-    "context_size": 100,
-    "initial_prompt": initial_prompt,
-    "description": description,
-    "icon": icon,
-    "easy_submit": false,
-    "auto_speech": false,
-    "initiate_from_assistant": false,
-    "toggle": true,
-    "image": true,
-    "models": models,
-    "model": models.first,
+    group: "Extra",
+    disabled: models.empty?,
+    display_name: "Chat (Ollama)",
+    context_size: 100,
+    initial_prompt: initial_prompt,
+    description: description,
+    icon: icon,
+    easy_submit: false,
+    auto_speech: false,
+    initiate_from_assistant: false,
+    toggle: true,
+    image: true,
+    models: models,
+    model: models.first,
   }
 end
